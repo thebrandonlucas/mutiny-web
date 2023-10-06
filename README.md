@@ -41,8 +41,6 @@ git checkout master && git pull && git checkout prod && git pull && git merge --
 
 ## Contributing
 
-Before committing make sure to run `pnpm run pre-commit`. This will typecheck, lint, and format everything so CI won't hassle you.
-
 ### Local
 
 If you want to develop against a local version of [the node manager](https://github.com/MutinyWallet/mutiny-node), you may want to `pnpm link` it.

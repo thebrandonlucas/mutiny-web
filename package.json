@@ -12,7 +12,8 @@
         "eslint": "eslint src",
         "pre-commit": "pnpm run eslint && pnpm run check-types && pnpm run format",
         "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
-        "check-format": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,scss,md}\""
+        "check-format": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+        "prepare": "husky install"
     },
     "type": "module",
     "devDependencies": {
@@ -39,7 +40,8 @@
         "vite": "^4.4.7",
         "vite-plugin-pwa": "^0.14.7",
         "vite-plugin-wasm": "^3.2.2",
-        "workbox-window": "^6.6.0"
+        "workbox-window": "^6.6.0",
+        "husky": "^8.0.0"
     },
     "dependencies": {
         "@capacitor/android": "^5.2.2",

@@ -78,10 +78,10 @@
             "eslint --fix"
         ],
         "src/**/*.{ts,tsx,js,jsx,json,css,scss,md}": [
-            "prettier --write --ignore-unknown"
+            "prettier --write"
         ],
         "src/**/*.{ts,tsx}": [
-            "tsc --noemit"
+            "tsc --noEmit"
         ]
     }
 }

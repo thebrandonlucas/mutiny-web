@@ -31,6 +31,8 @@
         "eslint-plugin-import": "2.27.5",
         "eslint-plugin-prettier": "4.2.1",
         "eslint-plugin-solid": "0.13.0",
+        "husky": "^8.0.0",
+        "lint-staged": "^15.0.2",
         "postcss": "^8.4.27",
         "prettier": "^3.0.2",
         "prettier-plugin-tailwindcss": "^0.5.3",
@@ -40,8 +42,7 @@
         "vite": "^4.4.7",
         "vite-plugin-pwa": "^0.14.7",
         "vite-plugin-wasm": "^3.2.2",
-        "workbox-window": "^6.6.0",
-        "husky": "^8.0.0"
+        "workbox-window": "^6.6.0"
     },
     "dependencies": {
         "@capacitor/android": "^5.2.2",
@@ -71,5 +72,13 @@
     },
     "engines": {
         "node": ">=16.8"
+    },
+    "lint-staged": {
+        "src": [
+            "eslint --fix"
+        ],
+        "src/**/*.{ts,tsx,js,jsx,json,css,scss,md}": [
+            "prettier --write --ignore-unknown"
+        ]
     }
 }

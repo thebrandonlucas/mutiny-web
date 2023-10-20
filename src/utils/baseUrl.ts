@@ -10,14 +10,3 @@ export function baseUrlAccountingForNative(network?: string) {
         return window.location.origin;
     }
 }
-
-function test() {
-    console.log("asdf");
-    console.log("asdf");
-    console.log("asdf");
-    console.log("asdf");
-
-    console.log("asdf");
-
-    console.log("asdf");
-}

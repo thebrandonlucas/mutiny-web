@@ -6,8 +6,7 @@
 
 ```
 pnpm install
-pnpm run prepare # setup husky pre-commit hooks
-pnpm run dev
+pnpm dev
 ```
 
 ### Env

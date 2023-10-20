@@ -74,11 +74,14 @@
         "node": ">=16.8"
     },
     "lint-staged": {
-        "src": [
+        "src/**/*": [
             "eslint --fix"
         ],
         "src/**/*.{ts,tsx,js,jsx,json,css,scss,md}": [
             "prettier --write --ignore-unknown"
+        ],
+        "src/**/*.{.ts,.tsx}": [
+            "tsc --noemit"
         ]
     }
 }

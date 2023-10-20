@@ -30,7 +30,7 @@ just test-ui
 
 ### Pre-Commit Hooks
 
-We use [husky](https://typicode.github.io/husky/) for [pre-commit hooks](https://pre-commit.com/). This allows us to run linting, formatting, and type-checking scripts before every commit, and can save a lot of time fighting errors in CI.
+We use [husky](https://typicode.github.io/husky/) with [lint-staged](https://github.com/lint-staged/lint-staged) for [pre-commit hooks](https://pre-commit.com/). This allows us to run linting, formatting, and type-checking scripts before every commit, and can save a lot of time fighting errors in CI.
 
 If you'd like to skip this verification for a commit, pass in the `--no-verify` flag, e.g. `git commit --no-verify -m "<my-commit-message>"`
 

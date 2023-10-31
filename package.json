@@ -81,7 +81,7 @@
             "prettier --write"
         ],
         "src/**/*.{ts,tsx}": [
-            "tsc --noEmit"
+            "bash -c 'pnpm run check-types'"
         ]
     }
 }

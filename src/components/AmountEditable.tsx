@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { Dialog } from "@kobalte/core";
 import {
     createEffect,
@@ -148,7 +149,7 @@ function BigScalingText(props: {
 
     return (
         <h1
-            class="px-2 text-center text-4xl font-light transition-transform duration-300 ease-out"
+            class="whitespace-nowrap px-2 text-center text-4xl font-light transition-transform duration-300 ease-out"
             classList={{
                 "scale-90": chars() >= 11,
                 "scale-95": chars() === 10,
@@ -164,7 +165,7 @@ function BigScalingText(props: {
                 {props.mode === "fiat" &&
                     //adds only the symbol
                     props.fiat?.hasSymbol}
-                {props.text}&nbsp;
+                {`${props.text} `}
                 <span class="text-xl">
                     {props.fiat ? props.fiat.value : i18n.t("common.sats")}
                 </span>
@@ -182,13 +183,15 @@ function SmallSubtleAmount(props: {
     const i18n = useI18n();
 
     return (
-        <h2 class="flex flex-row items-end text-xl font-light text-neutral-400">
+        <h2 class="flex flex-row items-end whitespace-nowrap text-xl font-light text-neutral-400">
             <Show when={!props.loading || props.mode === "fiat"} fallback="…">
                 {props.fiat?.value !== "BTC" && props.mode === "sats" && "~"}
                 {props.mode === "sats" &&
                     //adds only the symbol
                     props.fiat?.hasSymbol}
-                {props.text}&nbsp;
+                {`${props.text} `}
+                {/* IDK why a space doesn't work here */}
+                <span class="flex-0 w-1">{""}</span>
                 <span class="text-base">
                     {props.fiat ? props.fiat.value : i18n.t("common.sats")}
                 </span>
@@ -407,7 +410,7 @@ export const AmountEditable: ParentComponent<{
             const network = state.mutiny_wallet?.get_network() as Network;
             if (network === "bitcoin") {
                 return i18n.t("receive.amount_editable.receive_too_small", {
-                    amount: "50,000"
+                    amount: "100,000"
                 });
             } else {
                 return i18n.t("receive.amount_editable.receive_too_small", {
@@ -696,16 +699,21 @@ export const AmountEditable: ParentComponent<{
                     <InlineAmount amount={maxOrLocalSats()} />
                 </Show>
                 <img src={pencil} alt="Edit" />
-                {/* {props.children} */}
             </button>
             <Dialog.Portal>
-                {/* <Dialog.Overlay class={OVERLAY} /> */}
                 <div class={DIALOG_POSITIONER}>
                     <Dialog.Content
                         class={DIALOG_CONTENT}
+                        // Should always be on top, even when nested in other dialogs
+                        classList={{
+                            "z-50": true,
+                            // h-device works for android, h-[100dvh] works for ios
+                            "h-device": Capacitor.getPlatform() === "android"
+                        }}
                         onEscapeKeyDown={handleClose}
                     >
-                        {/* TODO: figure out how to submit on enter */}
+                        <div class="py-2" />
+
                         <div class="flex w-full justify-end">
                             <button
                                 onClick={handleClose}
@@ -715,7 +723,6 @@ export const AmountEditable: ParentComponent<{
                                 <img src={close} alt="Close" />
                             </button>
                         </div>
-                        {/* <form onSubmit={handleSubmit} class="text-black"> */}
                         <form
                             onSubmit={handleSubmit}
                             class="absolute -z-10 opacity-0"
@@ -850,6 +857,7 @@ export const AmountEditable: ParentComponent<{
                                 </Button>
                             </VStack>
                         </div>
+                        <div class="py-2" />
                     </Dialog.Content>
                 </div>
             </Dialog.Portal>

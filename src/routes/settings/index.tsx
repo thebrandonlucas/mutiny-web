@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { For, Show } from "solid-js";
 import { A } from "solid-start";
 
@@ -73,6 +74,11 @@ export default function Settings() {
     const COMMIT_HASH = import.meta.env.__COMMIT_HASH__;
 
     const selfHosted = state.settings?.selfhosted === "true";
+    const today = new Date();
+    // days are 1 indexed, months are 0 indexed
+    const isChristmas = today.getDate() === 25 && today.getMonth() === 11;
+
+    const ios = Capacitor.getPlatform() === "ios";
 
     return (
         <SafeArea>
@@ -80,7 +86,7 @@ export default function Settings() {
                 <BackLink />
                 <LargeHeader>{i18n.t("settings.header")}</LargeHeader>
                 <VStack biggap>
-                    <Show when={!selfHosted}>
+                    <Show when={!selfHosted && !ios}>
                         <MutinyPlusCta />
                     </Show>
                     <SettingsLinkList
@@ -129,10 +135,18 @@ export default function Settings() {
                             },
                             {
                                 href: "/settings/gift",
-                                disabled: !(state.mutiny_plus || selfHosted),
+                                disabled: !(
+                                    state.mutiny_plus ||
+                                    selfHosted ||
+                                    isChristmas
+                                ),
                                 text: i18n.t("settings.gift.title"),
-                                caption: !(state.mutiny_plus || selfHosted)
-                                    ? "Upgrade to Mutiny+ to enabled gifting"
+                                caption: !(
+                                    state.mutiny_plus ||
+                                    selfHosted ||
+                                    isChristmas
+                                )
+                                    ? i18n.t("settings.gift.no_plus_caption")
                                     : undefined
                             },
                             {
@@ -163,17 +177,17 @@ export default function Settings() {
                             }
                         ]}
                     />
+                    <div class="flex justify-center pb-8">
+                        <TinyText>
+                            {i18n.t("settings.version")} {RELEASE_VERSION}{" "}
+                            <ExternalLink
+                                href={`https://github.com/MutinyWallet/mutiny-web/commits/${COMMIT_HASH}`}
+                            >
+                                {COMMIT_HASH}
+                            </ExternalLink>
+                        </TinyText>
+                    </div>
                 </VStack>
-                <div class="flex justify-center">
-                    <TinyText>
-                        {i18n.t("settings.version")} {RELEASE_VERSION}{" "}
-                        <ExternalLink
-                            href={`https://github.com/MutinyWallet/mutiny-web/commits/${COMMIT_HASH}`}
-                        >
-                            {COMMIT_HASH}
-                        </ExternalLink>
-                    </TinyText>
-                </div>
             </DefaultMain>
             <NavBar activeTab="settings" />
         </SafeArea>

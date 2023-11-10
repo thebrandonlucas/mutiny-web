@@ -17,7 +17,8 @@ export default {
         error_unimplemented: "Unimplemented",
         why: "Why?",
         private_tags: "Private tags",
-        view_transaction: "View Transaction",
+        view_transaction: "View transaction",
+        view_payment_details: "View payment details",
         pending: "Pending",
         error_safe_mode:
             "Mutiny is running in safe mode. Lightning is disabled.",
@@ -36,6 +37,7 @@ export default {
         pay: "Pay",
         name: "Name",
         placeholder: "Satoshi",
+        lightning_address: "Lightning Address",
         unimplemented: "Unimplemented",
         not_available: "We don't do that yet",
         error_name: "We at least need a name"
@@ -69,6 +71,12 @@ export default {
         spendable: "Spendable",
         channel_size: "Channel size",
         channel_reserve: "- Channel reserve",
+        error_under_min_lightning:
+            "Defaulting to On-chain. Amount is too small for your initial Lightning receive.",
+        error_creating_unified:
+            "Defaulting to On-chain. Something went wrong when creating the unified address",
+        error_creating_address:
+            "Something went wrong when creating the on-chain address",
         amount_editable: {
             receive_too_small:
                 "Your first lightning receive needs to be {{amount}} SATS or greater. A setup fee will be deducted from the requested amount.",
@@ -157,7 +165,40 @@ export default {
         coming_soon: "Coming soon",
         private: "Private",
         anonymous: "Anonymous",
-        from: "From:"
+        from: "From:",
+        transaction_details: {
+            lightning_receive: "Received via Lightning",
+            lightning_send: "Sent via Lightning",
+            channel_open: "Channel open",
+            channel_close: "Channel close",
+            onchain_receive: "On-chain receive",
+            onchain_send: "On-chain send",
+            paid: "Paid",
+            unpaid: "Unpaid",
+            status: "Status",
+            date: "Date",
+            tagged_to: "Tagged to",
+            description: "Description",
+            fee: "Fee",
+            onchain_fee: "On-chain Fee",
+            invoice: "Invoice",
+            payment_hash: "Payment Hash",
+            payment_preimage: "Preimage",
+            txid: "Txid",
+            total: "Amount Requested",
+            balance: "Balance",
+            reserve: "Reserve",
+            peer: "Peer",
+            channel_id: "Channel ID",
+            reason: "Reason",
+            confirmed: "Confirmed",
+            unconfirmed: "Unconfirmed",
+            sweep_delay:
+                "Funds may take a few days to be swept back into the wallet",
+            no_details:
+                "No channel details found, which means this channel has likely been closed.",
+            back_home: "back home"
+        }
     },
     redshift: {
         title: "Redshift",
@@ -296,7 +337,8 @@ export default {
             remaining: "Remaining",
             confirm_delete: "Are you sure you want to delete this connection?",
             budget: "Budget",
-            resets_every: "Resets every"
+            resets_every: "Resets every",
+            resubscribe_date: "Resubscribe on"
         },
         emergency_kit: {
             title: "Emergency Kit",
@@ -459,6 +501,7 @@ export default {
         gift: {
             give_sats_link: "Give sats as a gift",
             title: "Gifting",
+            no_plus_caption: "Upgrade to Mutiny+ to enable gifting",
             receive_too_small:
                 "Your first receive needs to be {{amount}} SATS or greater.",
             setup_fee_lightning:
@@ -480,7 +523,7 @@ export default {
             send_explainer:
                 "Give the gift of sats. Create a Mutiny gift URL that can be claimed by anyone with a web browser.",
             send_name_required: "This is for your records",
-            send_name_label: "Recepient Name",
+            send_name_label: "Recipient Name",
             send_header_claimed: "Gift Received!",
             send_claimed: "Your gift has been claimed. Thanks for sharing.",
             send_sharable_header: "Sharable URL",
@@ -488,7 +531,7 @@ export default {
                 "Copy this gift URL to your recipient, or ask them to scan this QR code with their wallet.",
             send_another: "Create Another",
             send_small_warning:
-                "A brand new Mutiny user won't be able to redeem fewer than 50k sats.",
+                "A brand new Mutiny user won't be able to redeem fewer than 100k sats.",
             send_cta: "Create a gift",
             send_delete_button: "Delete Gift",
             send_delete_confirm:
@@ -617,40 +660,12 @@ export default {
                 "If you want to use pretend money to test out Mutiny without risk,",
             signet_link: "check out our Signet version."
         },
-        transaction_details: {
-            lightning_receive: "Lightning receive",
-            lightning_send: "Lightning send",
-            channel_open: "Channel open",
-            channel_close: "Channel close",
-            onchain_receive: "On-chain receive",
-            onchain_send: "On-chain send",
-            paid: "Paid",
-            unpaid: "Unpaid",
-            status: "Status",
-            when: "When",
-            description: "Description",
-            fee: "Fee",
-            fees: "Fees",
-            bolt11: "Bolt11",
-            payment_hash: "Payment Hash",
-            preimage: "Preimage",
-            txid: "Txid",
-            balance: "Balance",
-            reserve: "Reserve",
-            peer: "Peer",
-            channel_id: "Channel ID",
-            reason: "Reason",
-            confirmed: "Confirmed",
-            unconfirmed: "Unconfirmed",
-            no_details:
-                "No channel details found, which means this channel has likely been closed."
-        },
         more_info: {
             whats_with_the_fees: "What's with the fees?",
             self_custodial:
                 "Mutiny is a self-custodial wallet. To initiate a lightning payment we must open a lightning channel, which requires a minimum amount and a setup fee.",
             future_payments:
-                "Future payments, both send and recieve, will only incur normal network fees and a nominal service fee unless your channel runs out of inbound capacity.",
+                "Future payments, both send and receive, will only incur normal network fees and a nominal service fee unless your channel runs out of inbound capacity.",
             liquidity: "Learn more about liquidity"
         },
         confirm_dialog: {

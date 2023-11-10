@@ -1,3 +1,5 @@
+/* @refresh reload */
+
 import {
     Contact,
     MutinyBip21RawMaterials,
@@ -17,6 +19,7 @@ import { useNavigate } from "solid-start";
 
 import side2side from "~/assets/icons/side-to-side.svg";
 import {
+    ActivityDetailsModal,
     AmountCard,
     AmountFiat,
     AmountSats,
@@ -26,9 +29,9 @@ import {
     Card,
     Checkbox,
     DefaultMain,
-    ExternalLink,
     Fee,
     FeesModal,
+    HackActivityType,
     Indicator,
     InfoBox,
     IntegratedQr,
@@ -45,14 +48,12 @@ import {
     VStack
 } from "~/components";
 import { useI18n } from "~/i18n/context";
-import { matchError } from "~/logic/errorDispatch";
-import { Network } from "~/logic/mutinyWalletSetup";
 import { useMegaStore } from "~/state/megaStore";
 import {
     eify,
-    mempoolTxUrl,
     MutinyTagItem,
-    objectToSearchParams
+    objectToSearchParams,
+    vibrateSuccess
 } from "~/utils";
 
 type OnChainTx = {
@@ -140,6 +141,12 @@ export default function Receive() {
 
     // loading state for the continue button
     const [loading, setLoading] = createSignal(false);
+    const [error, setError] = createSignal<string>("");
+
+    // Details Modal
+    const [detailsOpen, setDetailsOpen] = createSignal(false);
+    const [detailsKind, setDetailsKind] = createSignal<HackActivityType>();
+    const [detailsId, setDetailsId] = createSignal<string>("");
 
     const RECEIVE_FLAVORS = [
         {
@@ -181,6 +188,30 @@ export default function Receive() {
         setPaymentTx(undefined);
         setPaymentInvoice(undefined);
         setSelectedValues([]);
+    }
+
+    function openDetailsModal() {
+        const paymentTxId =
+            paidState() === "onchain_paid"
+                ? paymentTx()
+                    ? paymentTx()?.txid
+                    : undefined
+                : paymentInvoice()
+                ? paymentInvoice()?.payment_hash
+                : undefined;
+        const kind = paidState() === "onchain_paid" ? "OnChain" : "Lightning";
+
+        console.log("Opening details modal: ", paymentTxId, kind);
+
+        if (!paymentTxId) {
+            console.warn("No id provided to openDetailsModal");
+            return;
+        }
+        if (paymentTxId !== undefined) {
+            setDetailsId(paymentTxId);
+        }
+        setDetailsKind(kind);
+        setDetailsOpen(true);
     }
 
     async function processContacts(
@@ -253,8 +284,12 @@ export default function Receive() {
             setLoading(false);
             return `bitcoin:${raw?.address}?${params}`;
         } catch (e) {
-            showToast(matchError(e));
             console.error(e);
+            if (e === "Satoshi amount is invalid") {
+                setError(i18n.t("receive.error_under_min_lightning"));
+            } else {
+                setError(i18n.t("receive.error_creating_unified"));
+            }
         }
 
         // If we didn't return before this, that means create_bip21 failed
@@ -271,7 +306,7 @@ export default function Receive() {
             return raw?.address;
         } catch (e) {
             // If THAT failed we're really screwed
-            showToast(matchError(e));
+            showToast(eify(i18n.t("receive.error_creating_address")));
             console.error(e);
         } finally {
             setLoading(false);
@@ -310,6 +345,7 @@ export default function Receive() {
                     if (invoice && invoice.paid) {
                         setReceiveState("paid");
                         setPaymentInvoice(invoice);
+                        await vibrateSuccess();
                         return "lightning_paid";
                     }
                 }
@@ -321,6 +357,7 @@ export default function Receive() {
                 if (tx) {
                     setReceiveState("paid");
                     setPaymentTx(tx);
+                    await vibrateSuccess();
                     return "onchain_paid";
                 }
             } catch (e) {
@@ -338,8 +375,6 @@ export default function Receive() {
     }
 
     const [paidState, { refetch }] = createResource(bip21Raw, checkIfPaid);
-
-    const network = state.mutiny_wallet?.get_network() as Network;
 
     createEffect(() => {
         const interval = setInterval(() => {
@@ -414,6 +449,11 @@ export default function Receive() {
                         </Match>
                         <Match when={unified() && receiveState() === "show"}>
                             <FeeWarning fee={lspFee()} flavor={flavor()} />
+                            <Show when={error()}>
+                                <InfoBox accent="red">
+                                    <p>{error()}</p>
+                                </InfoBox>
+                            </Show>
                             <IntegratedQr
                                 value={receiveString() ?? ""}
                                 amountSats={amount() || "0"}
@@ -425,7 +465,7 @@ export default function Receive() {
                             {/* Only show method chooser when we have an invoice */}
                             <Show when={bip21Raw()?.invoice}>
                                 <button
-                                    class="mx-auto flex items-center gap-2 p-2 font-bold text-m-grey-400"
+                                    class="mx-auto flex items-center gap-2 pb-8 font-bold text-m-grey-400"
                                     onClick={() => setMethodChooserOpen(true)}
                                 >
                                     <span>
@@ -471,6 +511,14 @@ export default function Receive() {
                                     navigate("/");
                                 }}
                             >
+                                <Show when={detailsId() && detailsKind()}>
+                                    <ActivityDetailsModal
+                                        open={detailsOpen()}
+                                        kind={detailsKind()}
+                                        id={detailsId()}
+                                        setOpen={setDetailsOpen}
+                                    />
+                                </Show>
                                 <MegaCheck />
                                 <h1 class="mb-2 mt-4 w-full text-center text-2xl font-semibold md:text-3xl">
                                     {receiveState() === "paid" &&
@@ -513,22 +561,14 @@ export default function Receive() {
                                 >
                                     <Fee amountSats={lspFee()} />
                                 </Show>
-                                {/*TODO: Confirmation time estimate still not possible needs to be implemented in mutiny-node first
-                                {/*TODO: add internal payment detail page* for lightning*/}
-                                <Show
-                                    when={
-                                        receiveState() === "paid" &&
-                                        paidState() === "onchain_paid"
-                                    }
-                                >
-                                    <ExternalLink
-                                        href={mempoolTxUrl(
-                                            paymentTx()?.txid,
-                                            network
-                                        )}
+                                {/*TODO: Confirmation time estimate still not possible needs to be implemented in mutiny-node first*/}
+                                <Show when={receiveState() === "paid"}>
+                                    <p
+                                        class="cursor-pointer underline"
+                                        onClick={openDetailsModal}
                                     >
-                                        {i18n.t("common.view_transaction")}
-                                    </ExternalLink>
+                                        {i18n.t("common.view_payment_details")}
+                                    </p>
                                 </Show>
                             </SuccessModal>
                         </Match>

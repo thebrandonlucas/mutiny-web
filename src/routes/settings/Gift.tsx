@@ -141,7 +141,7 @@ export default function GiftPage() {
     const [giftForm, { Form, Field }] = createForm<CreateGiftForm>({
         initialValues: {
             name: "",
-            amount: "50000"
+            amount: "100000"
         }
     });
 
@@ -198,12 +198,16 @@ export default function GiftPage() {
         }
     });
 
-    const lessThan50k = () => {
-        return Number(getValue(giftForm, "amount")) < 50000;
+    const lessThanMinChannelSize = () => {
+        return Number(getValue(giftForm, "amount")) < 100000;
     };
 
     const selfHosted = state.settings?.selfhosted === "true";
-    const canGift = state.mutiny_plus || selfHosted;
+    const today = new Date();
+    // days are 1 indexed, months are 0 indexed
+    const isChristmas = today.getDate() === 25 && today.getMonth() === 11;
+
+    const canGift = state.mutiny_plus || selfHosted || isChristmas;
 
     return (
         <MutinyWalletGuard>
@@ -305,7 +309,7 @@ export default function GiftPage() {
                                         </>
                                     )}
                                 </Field>
-                                <Show when={lessThan50k()}>
+                                <Show when={lessThanMinChannelSize()}>
                                     <InfoBox accent="green">
                                         {i18n.t(
                                             "settings.gift.send_small_warning"

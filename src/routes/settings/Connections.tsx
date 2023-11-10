@@ -50,6 +50,24 @@ function mapIntervalToBudgetPeriod(
     }
 }
 
+function mapBudgetRenewalToInterval(
+    budgetRenewal?: string
+): undefined | "Day" | "Week" | "Month" | "Year" {
+    if (!budgetRenewal) return undefined;
+    switch (budgetRenewal) {
+        case "day":
+            return "Day";
+        case "week":
+            return "Week";
+        case "month":
+            return "Month";
+        case "year":
+            return "Year";
+        default:
+            return undefined;
+    }
+}
+
 function Spending(props: { spent: number; remaining: number }) {
     const i18n = useI18n();
     return (
@@ -122,13 +140,15 @@ function NwcDetails(props: {
 
     return (
         <VStack>
-            <div class="w-full rounded-xl bg-white">
-                <QRCodeSVG
-                    value={props.profile.nwc_uri}
-                    class="h-full max-h-[320px] w-full p-8"
-                />
-            </div>
-            <ShareCard text={props.profile.nwc_uri || ""} />
+            <Show when={props.profile.index >= 1000}>
+                <div class="w-full rounded-xl bg-white">
+                    <QRCodeSVG
+                        value={props.profile.nwc_uri}
+                        class="h-full max-h-[320px] w-full p-8"
+                    />
+                </div>
+                <ShareCard text={props.profile.nwc_uri || ""} />
+            </Show>
 
             <Show when={!props.profile.require_approval}>
                 <TinyText>{i18n.t("settings.connections.careful")}</TinyText>
@@ -146,6 +166,15 @@ function NwcDetails(props: {
                 <Show when={props.profile.budget_period}>
                     <KeyValue key={i18n.t("settings.connections.resets_every")}>
                         {props.profile.budget_period}
+                    </KeyValue>
+                </Show>
+                <Show when={props.profile.index === 0}>
+                    <KeyValue
+                        key={i18n.t("settings.connections.resubscribe_date")}
+                    >
+                        {new Date(
+                            state.subscription_timestamp! * 1000
+                        ).toLocaleDateString()}
                     </KeyValue>
                 </Show>
             </Show>
@@ -276,6 +305,20 @@ function Nwc() {
         setSearchParams({ name: "" });
         setDialogOpen(false);
 
+        // If there's a "return_to" param we use that instead of the callbackUri scheme
+        const returnUrl = searchParams.return_to;
+        if (returnUrl) {
+            // add the nwc query param to the return url
+            const fullURI =
+                returnUrl +
+                (returnUrl.includes("?") ? "&" : "?") +
+                "nwc=" +
+                encodeURIComponent(newProfile.nwc_uri);
+
+            setCallbackUri(fullURI);
+            setCallbackDialogOpen(true);
+        }
+
         const callbackUriScheme = searchParams.callbackUri;
         if (callbackUriScheme) {
             const fullURI = newProfile.nwc_uri.replace(
@@ -332,6 +375,14 @@ function Nwc() {
                     initialName={queryName}
                     initialProfile={profileToOpen()}
                     onSave={createConnection}
+                    initialAmount={
+                        searchParams.max_amount
+                            ? searchParams.max_amount
+                            : undefined
+                    }
+                    initialInterval={mapBudgetRenewalToInterval(
+                        searchParams.budget_renewal
+                    )}
                 />
             </SimpleDialog>
             <SimpleDialog

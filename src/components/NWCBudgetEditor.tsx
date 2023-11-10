@@ -10,6 +10,7 @@ import { For, Show } from "solid-js";
 
 import {
     AmountEditable,
+    AmountSats,
     Button,
     Checkbox,
     InfoBox,
@@ -30,23 +31,45 @@ export type BudgetForm = {
 export function NWCBudgetEditor(props: {
     initialProfile?: NwcProfile;
     initialName?: string;
+    initialAmount?: string;
+    initialInterval?: "Day" | "Week" | "Month" | "Year";
     onSave: (value: BudgetForm) => Promise<void>;
 }) {
     const i18n = useI18n();
 
+    const connection_name =
+        props.initialProfile?.name ?? props.initialName ?? "";
+
+    // If there's an initial profile, look at that, otherwise default to false
+    const auto_approve =
+        props.initialAmount !== undefined ||
+        props.initialInterval !== undefined ||
+        (props.initialProfile?.require_approval !== undefined
+            ? !props.initialProfile?.require_approval
+            : false);
+
+    // prop amount -> profile editing -> subscriptions -> 0
+    // (ternaries take precendence so I put it in parens)
+    const budget_amount =
+        props.initialAmount ??
+        props.initialProfile?.budget_amount?.toString() ??
+        (props.initialProfile?.index === 0 ? "21000" : "0");
+
+    // prop intervail -> profile editing -> subscriptions -> day
+    const interval =
+        props.initialInterval ??
+        (props.initialProfile?.budget_period
+            ? (props.initialProfile?.budget_period as BudgetForm["interval"])
+            : props.initialProfile?.index === 0
+            ? "Month"
+            : "Day");
+
     const [budgetForm, { Form, Field }] = createForm<BudgetForm>({
         initialValues: {
-            connection_name:
-                props.initialProfile?.name || props.initialName || "",
-            // If there's an initial profile, look at that, otherwise default to false
-            auto_approve: props.initialProfile
-                ? !props.initialProfile.require_approval
-                : false,
-            budget_amount:
-                props.initialProfile?.budget_amount?.toString() || "0",
-            interval:
-                (props.initialProfile
-                    ?.budget_period as BudgetForm["interval"]) || "Day"
+            connection_name,
+            auto_approve,
+            budget_amount,
+            interval
         },
         validate: (values) => {
             const errors: Record<string, string> = {};
@@ -108,20 +131,34 @@ export function NWCBudgetEditor(props: {
                             <Field name="budget_amount">
                                 {(field, _fieldProps) => (
                                     <div class="flex flex-col items-end gap-2">
-                                        <AmountEditable
-                                            initialOpen={false}
-                                            initialAmountSats={
-                                                field.value || "0"
+                                        <Show
+                                            when={
+                                                props.initialProfile?.tag !==
+                                                "Subscription"
                                             }
-                                            showWarnings={false}
-                                            setAmountSats={(a) => {
-                                                setValue(
-                                                    budgetForm,
-                                                    "budget_amount",
-                                                    a.toString()
-                                                );
-                                            }}
-                                        />
+                                            fallback={
+                                                <AmountSats
+                                                    amountSats={
+                                                        Number(field.value) || 0
+                                                    }
+                                                />
+                                            }
+                                        >
+                                            <AmountEditable
+                                                initialOpen={false}
+                                                initialAmountSats={
+                                                    field.value || "0"
+                                                }
+                                                showWarnings={false}
+                                                setAmountSats={(a) => {
+                                                    setValue(
+                                                        budgetForm,
+                                                        "budget_amount",
+                                                        a.toString()
+                                                    );
+                                                }}
+                                            />
+                                        </Show>
                                         <p class="text-sm text-m-red">
                                             {field.error}
                                         </p>
@@ -134,42 +171,54 @@ export function NWCBudgetEditor(props: {
                         >
                             <Field name="interval">
                                 {(field, fieldProps) => (
-                                    <select
-                                        {...fieldProps}
-                                        class="w-full rounded-lg bg-m-grey-750 py-2 pl-4 pr-12 text-base font-normal text-white"
+                                    <Show
+                                        when={
+                                            props.initialProfile?.tag !==
+                                            "Subscription"
+                                        }
+                                        fallback={
+                                            budgetForm.internal.initialValues
+                                                .interval
+                                        }
                                     >
-                                        <For
-                                            each={[
-                                                {
-                                                    label: "Day",
-                                                    value: "Day"
-                                                },
-                                                {
-                                                    label: "Week",
-                                                    value: "Week"
-                                                },
-                                                {
-                                                    label: "Month",
-                                                    value: "Month"
-                                                },
-                                                {
-                                                    label: "Year",
-                                                    value: "Year"
-                                                }
-                                            ]}
+                                        <select
+                                            {...fieldProps}
+                                            class="w-full rounded-lg bg-m-grey-750 py-2 pl-4 pr-12 text-base font-normal text-white"
                                         >
-                                            {({ label, value }) => (
-                                                <option
-                                                    value={value}
-                                                    selected={
-                                                        field.value === value
+                                            <For
+                                                each={[
+                                                    {
+                                                        label: "Day",
+                                                        value: "Day"
+                                                    },
+                                                    {
+                                                        label: "Week",
+                                                        value: "Week"
+                                                    },
+                                                    {
+                                                        label: "Month",
+                                                        value: "Month"
+                                                    },
+                                                    {
+                                                        label: "Year",
+                                                        value: "Year"
                                                     }
-                                                >
-                                                    {label}
-                                                </option>
-                                            )}
-                                        </For>
-                                    </select>
+                                                ]}
+                                            >
+                                                {({ label, value }) => (
+                                                    <option
+                                                        value={value}
+                                                        selected={
+                                                            field.value ===
+                                                            value
+                                                        }
+                                                    >
+                                                        {label}
+                                                    </option>
+                                                )}
+                                            </For>
+                                        </select>
+                                    </Show>
                                 )}
                             </Field>
                         </KeyValue>

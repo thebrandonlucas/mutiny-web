@@ -15,4 +15,6 @@ export * from "./typescript";
 export * from "./useCopy";
 export * from "./words";
 export * from "./fetchZaps";
+export * from "./vibrate";
 export * from "./openLinkProgrammatically";
+export * from "./nostr";

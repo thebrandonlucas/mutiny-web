@@ -4,11 +4,12 @@ import { VitePWA, VitePWAOptions } from "vite-plugin-pwa";
 import wasm from "vite-plugin-wasm";
 import autoprefixer from "autoprefixer";
 import tailwindcss from "tailwindcss";
+import manifest from "./manifest";
 
 import * as path from "path";
 import * as child from "child_process";
 
-const commitHash = child.execSync("git rev-parse --short HEAD").toString().trim();
+const commitHash = process.env.VITE_COMMIT_HASH ?? child.execSync("git rev-parse --short HEAD").toString().trim();
 
 const pwaOptions: Partial<VitePWAOptions> = {
     base: "/",
@@ -17,30 +18,7 @@ const pwaOptions: Partial<VitePWAOptions> = {
         enabled: false
     },
     includeAssets: ["favicon.ico", "robots.txt"],
-    manifest: {
-        name: "Mutiny Wallet",
-        short_name: "Mutiny",
-        description: "A lightning wallet",
-        theme_color: "#000",
-        icons: [
-            {
-                src: "192.png",
-                sizes: "192x192",
-                type: "image/png"
-            },
-            {
-                src: "512.png",
-                sizes: "512x512",
-                type: "image/png"
-            },
-            {
-                src: "maskable_icon.png",
-                sizes: "512x512",
-                type: "image/png",
-                purpose: "any maskable"
-            }
-        ]
-    }
+    manifest: manifest
 };
 
 export default defineConfig({
@@ -67,12 +45,13 @@ export default defineConfig({
             "@solid-primitives/upload",
             "i18next",
             "i18next-browser-languagedetector",
-            "@mutinywallet/barcode-scanner",
+            "@capacitor-mlkit/barcode-scanner",
             "@nostr-dev-kit/ndk",
             "@capacitor/clipboard",
             "@capacitor/core",
             "@capacitor/filesystem",
             "@capacitor/toast",
+            "@capacitor/haptics",
             "@capacitor/app",
             "@capacitor/browser",
         ],

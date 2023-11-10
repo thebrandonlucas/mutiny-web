@@ -43,7 +43,6 @@ type ChooseCurrencyForm = {
  *  }
  */
 
-//Bitcoin and USD need to be FIAT_OPTIONS[0] and FIAT_OPTIONS[1] respectively, they are called in megaStore.tsx
 export const FIAT_OPTIONS: Currency[] = [
     {
         label: "Bitcoin BTC",
@@ -71,9 +70,21 @@ export const FIAT_OPTIONS: Currency[] = [
         maxFractionalDigits: 2
     },
     {
+        label: "Brazilian Real BRL",
+        value: "BRL",
+        hasSymbol: "R$",
+        maxFractionalDigits: 2
+    },
+    {
         label: "British Pound GBP",
         value: "GBP",
         hasSymbol: "₤",
+        maxFractionalDigits: 2
+    },
+    {
+        label: "Australia Dollar AUD",
+        value: "AUD",
+        hasSymbol: "$",
         maxFractionalDigits: 2
     },
     {
@@ -89,7 +100,10 @@ export const FIAT_OPTIONS: Currency[] = [
         maxFractionalDigits: 0
     },
     { label: "Kuwaiti Dinar KWD", value: "KWD", maxFractionalDigits: 3 }
-];
+].sort((a, b) => (a.value > b.value ? 1 : b.value > a.value ? -1 : 0));
+
+export const USD_INDEX = FIAT_OPTIONS.findIndex((fo) => fo.value === "USD");
+export const BTC_INDEX = FIAT_OPTIONS.findIndex((fo) => fo.value === "BTC");
 
 export function ChooseCurrency() {
     const i18n = useI18n();
